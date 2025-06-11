@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLV视频播放器</title>
+    <script src="https://cdn.jsdelivr.net/npm/flv.js@latest/dist/flv.min.js"></script>
+</head>
+<body>
+    <h1>摄像头05监控</h1>
+    <video id="videoElement" controls width="800" height="600" muted autoplay>
+        您的浏览器不支持HTML5视频播放
+    </video>
+    
+    <script>
+        if (flvjs.isSupported()) {
+            const videoElement = document.getElementById('videoElement');
+            const flvPlayer = flvjs.createPlayer({
+                type: 'flv',
+                url: 'ws://8.155.0.74:18001/2/73837861f8190c3f.live.flv',
+                isLive: true,
+                hasAudio: false,
+                hasVideo: true
+            }, {
+                enableWorker: false,
+                enableStashBuffer: false,
+                stashInitialSize: 128
+            });
+            
+            flvPlayer.attachMediaElement(videoElement);
+            flvPlayer.load();
+            
+            // 错误处理
+            flvPlayer.on(flvjs.Events.ERROR, (errorType, errorDetail) => {
+                console.error('播放错误:', errorType, errorDetail);
+            });
+        } else {
+            alert('您的浏览器不支持FLV播放');
+        }
+    </script>
+</body>
+</html>

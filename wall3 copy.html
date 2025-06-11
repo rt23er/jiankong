@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>建设工程安全评估智能体 - 视频墙</title>
+    <script src="https://cdn.jsdelivr.net/npm/flv.js@latest/dist/flv.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: 'Microsoft YaHei', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* 头部导航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 24px;
+            background: #2d3748;
+            border-bottom: 1px solid #4a5568;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #3182ce;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .nav-item {
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .nav-item:hover {
+            background: #4a5568;
+        }
+
+        .nav-item.active {
+            background: #3182ce;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            background: #48bb78;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* 主内容区域 */
+        .main-container {
+            display: flex;
+            gap: 16px;
+            padding: 16px;
+            height: calc(100vh - 80px);
+        }
+
+        /* 左侧视频列表 */
+        .video-sidebar {
+            width: 320px;
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 16px;
+            overflow: hidden;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .sidebar-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .play-icon {
+            color: #48bb78;
+        }
+
+        .sidebar-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            width: 32px;
+            height: 32px;
+            background: transparent;
+            border: 1px solid #4a5568;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: #4a5568;
+        }
+
+        /* 统计信息 */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-card {
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-card.online {
+            background: #3182ce;
+        }
+
+        .stat-card.offline {
+            background: #ed8936;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .stats-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            margin-bottom: 16px;
+            color: #a0aec0;
+        }
+
+        /* 视频列表 */
+        .video-list {
+            max-height: 400px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #4a5568 transparent;
+        }
+
+        .video-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .video-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .video-list::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 3px;
+        }
+
+        .video-item {
+            position: relative;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .video-item:hover {
+            transform: scale(1.02);
+            border-color: #4a5568;
+        }
+
+        .video-item.active {
+            border-color: #3182ce;
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+        }
+
+        .video-thumbnail {
+            width: 100%;
+            height: 120px;
+            background: #4a5568;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .thumbnail-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-label {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .active-indicator {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 8px;
+            height: 8px;
+            background: #f56565;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 右侧主显示区域 */
+        .main-display {
+            flex: 1;
+            background: #2d3748;
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .main-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 16px;
+            border-radius: 6px;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .video-time {
+            font-size: 14px;
+            color: #a0aec0;
+        }
+
+        .video-info-bottom {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            right: 16px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 12px 16px;
+            border-radius: 6px;
+            text-align: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-controls {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .video-control-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 0, 0, 0.7);
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s;
+            backdrop-filter: blur(4px);
+        }
+
+        .video-control-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-live {
+            background: #48bb78;
+            color: white;
+        }
+
+        .status-offline {
+            background: #f56565;
+            color: white;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .video-sidebar {
+                width: 100%;
+                height: 300px;
+            }
+            
+            .main-display {
+                height: 400px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 头部导航 -->
+    <div class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">🏗️</div>
+                <span style="font-size: 18px; font-weight: 600;">建设工程安全评估智能体</span>
+            </div>
+            <nav class="nav">
+                <div class="nav-item">首页</div>
+                <div class="nav-item">数据大屏</div>
+                <div class="nav-item active">视频墙</div>
+                <div class="nav-item">智能巡检</div>
+                <div class="nav-item">告警列表</div>
+                <div class="nav-item">智能专家</div>
+            </nav>
+        </div>
+        <div class="header-right">
+            <span>test</span>
+            <div class="user-avatar">T</div>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-container">
+        <!-- 左侧视频列表 -->
+        <div class="video-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-title">
+                    <span class="play-icon">▶</span>
+                    <span>摄像头设备总览</span>
+                </div>
+                <div class="sidebar-controls">
+                    <button class="control-btn" onclick="refreshVideos()">🔄</button>
+                    <button class="control-btn" onclick="toggleGrid()">⊞</button>
+                    <button class="control-btn" onclick="toggleList()">⊟</button>
+                </div>
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="stats">
+                <div class="stat-card online">
+                    <div class="stat-number" id="onlineCount">7</div>
+                    <div class="stat-label">在线摄像头</div>
+                </div>
+                <div class="stat-card offline">
+                    <div class="stat-number" id="offlineCount">0</div>
+                    <div class="stat-label">离线摄像头</div>
+                </div>
+            </div>
+
+            <div class="stats-info">
+                <span>摄像头数量: <span id="totalCount">7</span></span>
+                <span>摄像头在线率: <span id="onlineRate">100%</span></span>
+            </div>
+
+            <!-- 视频列表 -->
+            <div class="video-list" id="videoList">
+                <!-- 视频项将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧主显示区域 -->
+        <div class="main-display">
+            <video id="mainVideo" class="main-video" controls muted>
+                您的浏览器不支持视频播放。
+            </video>
+
+            <!-- 视频信息覆盖层 -->
+            <div class="video-overlay">
+                <div class="video-title" id="currentVideoTitle">摄像头05</div>
+                <div class="video-time" id="currentTime">2025年06月11日 星期二 03:49:46</div>
+            </div>
+
+            <!-- 底部信息栏 -->
+            <!-- <div class="video-info-bottom">
+                <div>宝安区基督教福音永聚会点讲平台</div>
+            </div> -->
+
+            <!-- 视频控制按钮 -->
+            <div class="video-controls">
+                <button class="video-control-btn" onclick="togglePlayPause()" id="playPauseBtn">⏸️</button>
+                <button class="video-control-btn" onclick="toggleFullscreen()">⛶</button>
+                <button class="video-control-btn" onclick="reconnectStream()" title="重连">🔄</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 视频数据
+        const videoData = [
+            { 
+                id: 1, 
+                name: '摄像头05', 
+                src: 'ws://8.155.0.74:18001/2/73837861f8190c3f.live.flv',
+                type: 'flv',
+                isLive: true,
+                status: 'online'
+            },
+            { 
+                id: 2, 
+                name: '安全帽02', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            },
+            { 
+                id: 3, 
+                name: '摄像头06', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            },
+            { 
+                id: 4, 
+                name: '摄像头04', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            },
+            { 
+                id: 5, 
+                name: '摄像头07', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            },
+            { 
+                id: 6, 
+                name: '安全帽01', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            },
+            { 
+                id: 7, 
+                name: '摄像头03', 
+                src: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+                type: 'mp4',
+                isLive: false,
+                status: 'online'
+            }
+        ];
+
+        let currentVideoIndex = 0;
+        let isPlaying = false;
+        let flvPlayer = null;
+        let thumbnailPlayers = [];
+
+        // 检查FLV.js支持
+        function checkFlvSupport() {
+            if (typeof flvjs === 'undefined') {
+                console.error('FLV.js 未加载');
+                return false;
+            }
+            return flvjs.isSupported();
+        }
+
+        // 销毁FLV播放器
+        function destroyFlvPlayer(player) {
+            if (player) {
+                try {
+                    player.pause();
+                    player.unload();
+                    player.detachMediaElement();
+                    player.destroy();
+                } catch (e) {
+                    console.warn('销毁播放器时出错:', e);
+                }
+            }
+        }
+
+        // 启动所有缩略图视频播放
+        function startAllThumbnailVideos() {
+            thumbnailPlayers.forEach(pInfo => {
+                const videoEl = pInfo.element;
+                if (videoEl && videoEl.paused) {
+                    videoEl.play().catch(e => console.warn('缩略图视频播放失败:', e));
+                }
+            });
+        }
+
+        // 初始化页面
+        function init() {
+            if (!checkFlvSupport()) {
+                alert('您的浏览器不支持FLV播放，请使用Chrome或Firefox浏览器');
+                return;
+            }
+
+            renderVideoList();
+            updateTime();
+            setInterval(updateTime, 1000);
+            
+            // 初始化主视频
+            selectVideo(0);
+
+            // 启动并定期检查缩略图播放
+            startAllThumbnailVideos();
+            setInterval(startAllThumbnailVideos, 3000);
+        }
+
+        // 创建FLV播放器
+        function createFlvPlayer(videoElement, src, options = {}) {
+            if (!flvjs.isSupported()) {
+                console.error('浏览器不支持FLV播放');
+                return null;
+            }
+
+            const defaultOptions = {
+                enableWorker: false,
+                enableStashBuffer: false,
+                stashInitialSize: 128,
+                autoCleanupMaxBackwardDuration: 3,
+                autoCleanupMinBackwardDuration: 2
+            };
+
+            const flvConfig = {
+                type: 'flv',
+                url: src,
+                isLive: true,
+                hasAudio: false,
+                hasVideo: true
+            };
+
+            const player = flvjs.createPlayer(flvConfig, { ...defaultOptions, ...options });
+            
+            // 错误处理
+            player.on(flvjs.Events.ERROR, (errorType, errorDetail) => {
+                console.error('FLV播放错误:', errorType, errorDetail);
+                if (errorType === flvjs.ErrorTypes.NETWORK_ERROR) {
+                    console.log('网络错误，尝试重连...');
+                    setTimeout(() => {
+                        if (player) {
+                            player.unload();
+                            player.load();
+                        }
+                    }, 3000);
+                }
+            });
+
+            player.on(flvjs.Events.LOADING_COMPLETE, () => {
+                console.log('FLV流加载完成');
+            });
+
+            return player;
+        }
+
+        // 渲染视频列表
+        function renderVideoList() {
+            const videoList = document.getElementById('videoList');
+            videoList.innerHTML = '';
+
+            // 清理旧的缩略图播放器
+            thumbnailPlayers.forEach(pInfo => destroyFlvPlayer(pInfo.player));
+            thumbnailPlayers = [];
+
+            videoData.forEach((video, index) => {
+                const videoItem = document.createElement('div');
+                videoItem.className = `video-item ${index === currentVideoIndex ? 'active' : ''}`;
+                videoItem.onclick = () => selectVideo(index);
+
+                const statusClass = video.status === 'online' ? 'status-live' : 'status-offline';
+                const statusText = video.isLive ? 'LIVE' : 'VOD';
+
+                videoItem.innerHTML = `
+                    <div class="video-thumbnail">
+                        <video class="thumbnail-video" muted></video>
+                        <div class="video-label">${video.name}</div>
+                        <div class="status-indicator ${statusClass}">${statusText}</div>
+                        ${index === currentVideoIndex ? '<div class="active-indicator"></div>' : ''}
+                    </div>
+                `;
+
+                videoList.appendChild(videoItem);
+
+                // 为缩略图设置播放器
+                const thumbnailVideo = videoItem.querySelector('.thumbnail-video');
+                if (video.type === 'flv' && video.status === 'online') {
+                    // 为FLV流创建缩略图播放器并实时播放（与主视频相同方式）
+                    // 静音确保自动播放
+                    thumbnailVideo.muted = true;
+                    thumbnailVideo.loop = true;
+                    thumbnailVideo.playsInline = true;
+                    thumbnailVideo.setAttribute('playsinline', '');
+                    thumbnailVideo.setAttribute('webkit-playsinline', '');
+                    thumbnailVideo.setAttribute('preload', 'auto');
+                    thumbnailVideo.style.objectFit = 'cover';
+                    
+                    // 使用与主视频相同的默认配置创建 FLV 播放器
+                    const thumbnailFlvPlayer = createFlvPlayer(thumbnailVideo, video.src);
+                    if (thumbnailFlvPlayer) {
+                        thumbnailPlayers.push({player: thumbnailFlvPlayer, element: thumbnailVideo});
+                        thumbnailFlvPlayer.attachMediaElement(thumbnailVideo);
+                        thumbnailFlvPlayer.load();
+                        // 监听 canplay 事件启动播放
+                        thumbnailVideo.addEventListener('canplay', () => {
+                            thumbnailVideo.play().catch(e => console.warn('缩略图FLV canplay播放失败:', e));
+                        });
+                        // 尝试立即播放
+                        thumbnailVideo.play().catch(e => console.warn('缩略图FLV立即播放失败:', e));
+                    }
+                } else if (video.type === 'mp4') {
+                    thumbnailVideo.src = video.src;
+                    thumbnailVideo.setAttribute('preload', 'auto');
+                    thumbnailVideo.load();
+                    // 视频加载后播放
+                    thumbnailVideo.addEventListener('loadeddata', () => {
+                        thumbnailVideo.play().catch(e => console.warn('缩略图MP4播放失败:', e));
+                    });
+                }
+            });
+        }
+
+        // 选择视频
+        function selectVideo(index) {
+            if (index === currentVideoIndex && flvPlayer) return;
+
+            // 清理当前播放器
+            if (flvPlayer) {
+                destroyFlvPlayer(flvPlayer);
+                flvPlayer = null;
+            }
+
+            currentVideoIndex = index;
+            const mainVideo = document.getElementById('mainVideo');
+            const currentVideo = videoData[index];
+
+            // 更新视频标题
+            document.getElementById('currentVideoTitle').textContent = currentVideo.name;
+
+            if (currentVideo.type === 'flv' && currentVideo.status === 'online') {
+                // FLV直播流
+                flvPlayer = createFlvPlayer(mainVideo, currentVideo.src);
+                if (flvPlayer) {
+                    flvPlayer.attachMediaElement(mainVideo);
+                    flvPlayer.load();
+                    
+                    // 监听播放状态
+                    mainVideo.addEventListener('loadeddata', () => {
+                        console.log('FLV流数据加载完成');
+                        mainVideo.play().catch(e => {
+                            console.warn('自动播放失败:', e);
+                        });
+                    });
+
+                    mainVideo.addEventListener('play', () => {
+                        isPlaying = true;
+                        updatePlayPauseButton();
+                    });
+
+                    mainVideo.addEventListener('pause', () => {
+                        isPlaying = false;
+                        updatePlayPauseButton();
+                    });
+                }
+            } else {
+                // MP4文件
+                mainVideo.src = currentVideo.src;
+                mainVideo.load();
+                
+                mainVideo.addEventListener('loadeddata', () => {
+                    mainVideo.play().catch(e => {
+                        console.warn('自动播放失败:', e);
+                    });
+                });
+
+                mainVideo.addEventListener('play', () => {
+                    isPlaying = true;
+                    updatePlayPauseButton();
+                });
+
+                mainVideo.addEventListener('pause', () => {
+                    isPlaying = false;
+                    updatePlayPauseButton();
+                });
+            }
+
+            // 重新渲染列表以更新活动状态
+            renderVideoList();
+
+            // 滚动到选中的视频项
+            scrollToActiveVideo();
+        }
+
+        // 滚动到活动视频项
+        function scrollToActiveVideo() {
+            const videoList = document.getElementById('videoList');
+            const activeItem = videoList.querySelector('.video-item.active');
+            if (activeItem) {
+                activeItem.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }
+        }
+
+        // 播放/暂停切换
+        function togglePlayPause() {
+            const mainVideo = document.getElementById('mainVideo');
+            if (mainVideo.paused) {
+                mainVideo.play().catch(e => {
+                    console.warn('播放失败:', e);
+                });
+            } else {
+                mainVideo.pause();
+            }
+        }
+
+        // 更新播放/暂停按钮
+        function updatePlayPauseButton() {
+            const btn = document.getElementById('playPauseBtn');
+            btn.textContent = isPlaying ? '⏸️' : '▶️';
+        }
+
+        // 全屏切换
+        function toggleFullscreen() {
+            const mainVideo = document.getElementById('mainVideo');
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                mainVideo.requestFullscreen().catch(e => {
+                    console.warn('全屏失败:', e);
+                });
+            }
+        }
+
+        // 重连流媒体
+        function reconnectStream() {
+            if (flvPlayer && videoData[currentVideoIndex].type === 'flv') {
+                console.log('重连FLV流...');
+                try {
+                    flvPlayer.unload();
+                    setTimeout(() => {
+                        flvPlayer.load();
+                    }, 500);
+                } catch (e) {
+                    console.error('重连失败:', e);
+                    // 重新创建播放器
+                    selectVideo(currentVideoIndex);
+                }
+            }
+        }
+
+        // 更新时间显示
+        function updateTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+            const weekday = weekdays[now.getDay()];
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            const timeString = `${year}年${month}月${day}日 星期${weekday} ${hours}:${minutes}:${seconds}`;
+            document.getElementById('currentTime').textContent = timeString;
+        }
+
+        // 刷新视频列表
+        function refreshVideos() {
+            console.log('刷新视频列表');
+            renderVideoList();
+        }
+
+        // 切换网格视图
+        function toggleGrid() {
+            console.log('切换到网格视图');
+        }
+
+        // 切换列表视图
+        function toggleList() {
+            console.log('切换到列表视图');
+        }
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case ' ':
+                    e.preventDefault();
+                    togglePlayPause();
+                    break;
+                case 'f':
+                case 'F':
+                    toggleFullscreen();
+                    break;
+                case 'r':
+                case 'R':
+                    reconnectStream();
+                    break;
+                case 'ArrowUp':
+                    e.preventDefault();
+                    if (currentVideoIndex > 0) {
+                        selectVideo(currentVideoIndex - 1);
+                    }
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    if (currentVideoIndex < videoData.length - 1) {
+                        selectVideo(currentVideoIndex + 1);
+                    }
+                    break;
+            }
+        });
+
+        // 页面卸载时清理资源
+        window.addEventListener('beforeunload', () => {
+            if (flvPlayer) {
+                destroyFlvPlayer(flvPlayer);
+            }
+            thumbnailPlayers.forEach(pInfo => destroyFlvPlayer(pInfo.player));
+        });
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

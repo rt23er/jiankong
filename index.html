@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中冶智能安全监管服务平台</title>
+    <link rel="icon" href="assets/logo.png" type="image/png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: #1a1a1a;
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        /* 导航栏样式 */
+        .navbar {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+        }
+
+        .logo-text {
+            font-size: 16px;
+            font-weight: 500;
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            color: #fff;
+            background: #1a73e8;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #2196F3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* 主要内容区域 */
+        .main-content {
+            padding-top: 80px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .welcome-section {
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            padding: 60px 20px;
+        }
+
+        .welcome-text {
+            font-size: 120px;
+            font-weight: bold;
+            color: var(--primary-color);
+            letter-spacing: 4px;
+            position: relative;
+            display: inline-block;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: textShine 3s ease-in-out infinite;
+        }
+
+        @keyframes textShine {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .welcome-illustration {
+            position: relative;
+            margin-top: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            transition: transform 0.5s ease;
+        }
+
+        .welcome-illustration:hover {
+            transform: translateY(-10px);
+        }
+
+        .welcome-illustration img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 装饰元素 */
+        .decoration {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0.4;
+            z-index: 1;
+            transition: all 1s ease;
+        }
+
+        .decoration.circles {
+            top: 20%;
+            right: 15%;
+            animation: rotate 30s linear infinite;
+        }
+
+        .decoration.leaves {
+            bottom: 10%;
+            left: 10%;
+            animation: float 15s ease-in-out infinite;
+        }
+
+        @keyframes rotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* 快速访问卡片 */
+        .quick-access {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 60px;
+            padding: 0 20px;
+        }
+
+        .quick-card {
+            background: var(--background-card);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+        }
+
+        .quick-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .quick-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .quick-card-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .quick-card:hover .quick-card-icon {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .quick-card-icon svg {
+            width: 30px;
+            height: 30px;
+            fill: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .quick-card-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        .quick-card-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .welcome-text {
+                font-size: 60px;
+            }
+
+            .welcome-illustration img {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo-section">
+            <img src="assets/logo.png" alt="Logo" class="logo-img">
+            <span class="logo-text">中冶智能安全监管服务平台</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="index.html" class="nav-link active">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M3 13h1v7c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-7h1a1 1 0 0 0 .707-1.707l-9-9a.999.999 0 0 0-1.414 0l-9 9A1 1 0 0 0 3 13zm9-8.586 6 6V20H6v-9.586l6-6z"/>
+                </svg>
+                首页
+            </a>
+            <a href="device-management.html" class="nav-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+                </svg>
+                设备管理
+            </a>
+            <a href="wall3.html" class="nav-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M20 2H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h3v3.767L13.277 18H20c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 14h-7.277L9 18.233V16H4V4h16v12z"/>
+                </svg>
+                数据大屏
+            </a>
+            <a href="#" class="nav-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
+                    <path d="M11 11h2v6h-2zm0-4h2v2h-2z"/>
+                </svg>
+                智能巡检
+            </a>
+            <a href="#" class="nav-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 3c-4.963 0-9 4.037-9 9s4.037 9 9 9 9-4.037 9-9-4.037-9-9-9zm0 16c-3.859 0-7-3.141-7-7s3.141-7 7-7 7 3.141 7 7-3.141 7-7 7z"/>
+                    <path d="M13 7h-2v5.414l3.293 3.293 1.414-1.414L13 11.586z"/>
+                </svg>
+                告警列表
+            </a>
+            <a href="#" class="nav-link">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"/>
+                    <path d="M13 7h-2v7h2zm0 8h-2v2h2z"/>
+                </svg>
+                智能专家
+            </a>
+        </div>
+
+        <div class="user-section">
+            <span id="currentUsername">未登录</span>
+            <div class="user-avatar" id="userAvatar">?</div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="main-content">
+        <div class="welcome-section fade-in">
+            <div class="welcome-text">WELCOME</div>
+            <div class="welcome-illustration">
+                <!-- <img src="./assets/bg.jpeg" alt="Welcome Illustration"> -->
+            </div>
+        </div>
+
+   
+
+        <!-- 装饰元素 -->
+        <div class="decoration circles">
+            <svg width="200" height="200" viewBox="0 0 200 200">
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#1a73e8" stroke-width="2"/>
+                <circle cx="100" cy="100" r="60" fill="none" stroke="#1a73e8" stroke-width="2"/>
+                <circle cx="100" cy="100" r="40" fill="none" stroke="#1a73e8" stroke-width="2"/>
+            </svg>
+        </div>
+        <div class="decoration leaves">
+            <svg width="150" height="150" viewBox="0 0 150 150">
+                <path d="M75 0 Q 100 50 75 100 Q 50 50 75 0" fill="none" stroke="#1a73e8" stroke-width="2"/>
+                <path d="M25 50 Q 75 75 125 50" fill="none" stroke="#1a73e8" stroke-width="2"/>
+            </svg>
+        </div>
+    </main>
+
+    <!-- 添加用户名显示脚本 -->
+    <script src="transitions.js"></script>
+    <script src="modernNavIcons.js"></script>
+    <script>
+        // 页面加载时从localStorage获取用户名并显示
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = localStorage.getItem('currentUser');
+            const usernameElement = document.getElementById('currentUsername');
+            const avatarElement = document.getElementById('userAvatar');
+            
+            if (username) {
+                usernameElement.textContent = username;
+                // 获取用户名首字母作为头像
+                const initial = username.charAt(0).toUpperCase();
+                avatarElement.textContent = initial;
+            } else {
+                // 如果未登录，跳转到登录页
+                location.href = 'login.html';
+            }
+        });
+
+        // 首页特殊交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 3D视差效果
+            document.addEventListener('mousemove', function(e) {
+                const moveX = (e.clientX - window.innerWidth / 2) * 0.01;
+                const moveY = (e.clientY - window.innerHeight / 2) * 0.01;
+                
+                const welcomeIllustration = document.querySelector('.welcome-illustration');
+                const circles = document.querySelector('.decoration.circles');
+                const leaves = document.querySelector('.decoration.leaves');
+                
+                if (welcomeIllustration) {
+                    welcomeIllustration.style.transform = `translateX(${moveX}px) translateY(${moveY}px)`;
+                }
+                
+                if (circles) {
+                    circles.style.transform = `translateX(${-moveX * 2}px) translateY(${-moveY * 2}px)`;
+                }
+                
+                if (leaves) {
+                    leaves.style.transform = `translateX(${moveX * 3}px) translateY(${moveY * 3}px)`;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
